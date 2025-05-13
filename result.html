@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AQI Result</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #3a7bd5, #00d2ff);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    .result-box {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 30px 40px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(255,255,255,0.2);
+      max-width: 400px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 15px;
+    }
+
+    #aqi-result {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    #advisory {
+      font-size: 1.1rem;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .good { background-color: #00e40044; color: #00e400; }
+    .moderate { background-color: #ffff0044; color: #ff0; }
+    .usg { background-color: #ff7e0044; color: #ff7e00; }
+    .unhealthy { background-color: #ff000044; color: #ff0000; }
+    .very-unhealthy { background-color: #8f3f9744; color: #8f3f97; }
+    .hazardous { background-color: #7e002344; color: #7e0023; }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      background-color: #ffffff22;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      border: 1px solid white;
+      transition: background-color 0.3s ease;
+    }
+
+    .back-link:hover {
+      background-color: #ffffff44;
+    }
+  </style>
+</head>
+<body>
+  <div class="result-box">
+    <h1>Your Calculated AQI</h1>
+    <p id="aqi-result">Calculating...</p>
+    <div id="advisory" class="">Loading advisory...</div>
+    <a class="back-link" href="/">← Back to form</a>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const aqi = parseInt(params.get("aqi"));
+    const resultElem = document.getElementById("aqi-result");
+    const advisoryElem = document.getElementById("advisory");
+
+    if (!isNaN(aqi)) {
+      resultElem.textContent = `AQI : ${aqi}`;
+
+      let message = "";
+      let category = "";
+
+      if (aqi <= 50) {
+        message = "Air quality is considered satisfactory. It's a great day to be outside!";
+        category = "good";
+      } else if (aqi <= 100) {
+        message = "Air quality is acceptable. Some pollutants may be a concern for sensitive individuals.";
+        category = "moderate";
+      } else if (aqi <= 150) {
+        message = "Unhealthy for Sensitive Groups. Children, elderly, and those with respiratory issues should reduce outdoor exertion.";
+        category = "usg";
+      } else if (aqi <= 200) {
+        message = "Unhealthy. Everyone may begin to experience health effects; sensitive groups should avoid outdoor activities.";
+        category = "unhealthy";
+      } else if (aqi <= 300) {
+        message = "Very Unhealthy. Health alert: everyone may experience more serious health effects.";
+        category = "very-unhealthy";
+      } else {
+        message = "Hazardous. Serious health effects. Avoid outdoor activity and stay indoors.";
+        category = "hazardous";
+      }
+
+      advisoryElem.textContent = message;
+      advisoryElem.classList.add(category);
+    } else {
+      resultElem.textContent = "Unable to calculate AQI";
+      advisoryElem.textContent = "";
+    }
+  </script>
+</body>
+</html>
