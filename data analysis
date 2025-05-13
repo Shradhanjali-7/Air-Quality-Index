@@ -1,0 +1,304 @@
+## importing the required libraries
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+## reading the csv files into its own data frame using the .read_csv function
+aot=pd.read_csv("PRSA_Data_Aotizhongxin_20130301-20170228.csv")
+chan=pd.read_csv("PRSA_Data_Changping_20130301-20170228.csv")
+ding=pd.read_csv("PRSA_Data_Dingling_20130301-20170228.csv")
+dong=pd.read_csv("PRSA_Data_Dongsi_20130301-20170228.csv")
+guan=pd.read_csv("PRSA_Data_Guanyuan_20130301-20170228.csv")
+guch=pd.read_csv("PRSA_Data_Gucheng_20130301-20170228.csv")
+hua=pd.read_csv("PRSA_Data_Huairou_20130301-20170228.csv")
+nong=pd.read_csv("PRSA_Data_Nongzhanguan_20130301-20170228.csv")
+shu=pd.read_csv("PRSA_Data_Shunyi_20130301-20170228.csv")
+tian=pd.read_csv("PRSA_Data_Tiantan_20130301-20170228.csv")
+wan=pd.read_csv("PRSA_Data_Wanliu_20130301-20170228.csv")
+wans=pd.read_csv("PRSA_Data_Wanshouxigong_20130301-20170228.csv")
+
+## creating a list called dfs which will contain the previovsly created dataframe
+dfs=[aot,chan,ding,dong,guan,guch,hua,nong,shu,tian,wan,wans]
+  
+## use .concat function to join all the data frames together vertically
+air=pd.concat(dfs)
+  
+ ## reset the index of the air data frame
+air.reset_index(drop=True, inplace = True)
+
+## print the first 5 row of air using the .head function
+air.head()
+
+## Drop the NO column from air using the .drop()
+air=air.drop(['No'], axis = 1)
+
+## Rename the PM2.5 column to PM25 so that there are no error when referring to it when carry out operation
+air.rename(index = str,columns = {'PM2.5' : 'PM25'}, inplace = True)
+
+## check for missing values using .isnull() and sum()
+air.isnull().sum()
+
+## calculate the % of missing values . Round the % up to 4 char
+round(air.isnull().sum()/len(air.index), 4)*100
+air.head()
+
+#Missing value treatment
+air['PM25'] = air['PM25'].fillna(air['PM25'].mean())
+air['PM10'] = air['PM10'].fillna(air['PM10'].mean())
+air['SO2'] = air['SO2'].fillna(air['SO2'].mean())
+air['NO2'] = air['NO2'].fillna(air['NO2'].mean())
+air['CO'] = air['CO'].fillna(air['CO'].mean())
+air['O3'] = air['O3'].fillna(air['O3'].mean())
+air['TEMP'] = air['TEMP'].fillna(air['TEMP'].mean())
+air['PRES'] = air['PRES'].fillna(air['PRES'].mean())
+air['DEWP'] = air['DEWP'].fillna(air['DEWP'].mean())
+air['RAIN'] = air['RAIN'].fillna(air['RAIN'].mean())
+air['WSPM'] = air['WSPM'].fillna(air['WSPM'].mean())
+air['wd'] = air['wd'].fillna(air['wd'].mode()[0])
+
+ ## check for missing values using .isnull() and sum()
+air.isnull().sum()
+
+#boxplot of PM2.5
+sns.boxplot(x=air['PM25'])
+plt.title('BOXPLOT OF PM2.5')
+
+#filter the data 
+filtered_air=air[air['PM25'] <= 200]
+sns.boxplot(x=filtered_air['PM25'])
+plt.title('BOXPLOT OF PM2.5')
+
+# Calculate Q1, Q3, and IQR
+Q1 = air['PM25'].quantile(0.25)  # 25th percentile
+Q3 = air['PM25'].quantile(0.75)  # 75th percentile
+IQR = Q3 - Q1  # Interquartile range
+
+# Define the lower and upper bounds
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+# Filter the dataset to remove outliers
+filtered_air = air[(air['PM25'] >= lower_bound) & (air['PM25'] <= upper_bound)]
+
+# Plot the new boxplot after removing outliers
+sns.boxplot(x=filtered_air['PM25'])
+plt.title('Boxplot of PM10 After Removing Outliers')
+plt.show()
+
+ #boxplot of PM10
+sns.boxplot(x=air['PM10'])
+plt.title('BOXPLOT OF PM10')
+
+ #filter the data 
+filtered_air=air[air['PM10'] <= 205]
+sns.boxplot(x=filtered_air['PM10'])
+plt.title('BOXPLOT OF PM10')
+
+#boxplot of SO2
+sns.boxplot(x=air['SO2'])
+plt.title('BOXPLOT OF SO2')
+
+#filter the data 
+filtered_air=air[air['SO2'] <= 27]
+sns.boxplot(x=filtered_air['SO2'])
+plt.title('BOXPLOT OF SO2')
+
+ #boxplot of NO2
+sns.boxplot(x=air['NO2'])
+plt.title('BOXPLOT OF NO2')
+
+ #filter the data 
+filtered_air=air[air['NO2'] <= 100]
+sns.boxplot(x=filtered_air['NO2'])
+plt.title('BOXPLOT OF NO2')
+
+#boxplot of O3
+sns.boxplot(x=air['O3'])
+plt.title('BOXPLOT OF O3')
+
+ #filter the data of O3
+filtered_air=air[air['O3'] <= 100]
+sns.boxplot(x=filtered_air['O3'])
+plt.title('BOXPLOT OF O3')
+
+ #boxplot of TEMPERATURE
+sns.boxplot(x=air['TEMP'])
+plt.title('BOXPLOT OF TEMP')
+
+ #boxplot of PRESSURE
+sns.boxplot(x=air['PRES'])
+plt.title('BOXPLOT OF PRES')
+
+ #boxplot of DEWP
+sns.boxplot(x=air['DEWP'])
+plt.title('BOXPLOT OF DEWP')
+
+#boxplot of RAIN
+sns.boxplot(x=air['RAIN'])
+plt.title('BOXPLOT OF RAIN')
+
+ #filter the data 
+filtered_air=air[air['RAIN'] <= 0]
+sns.boxplot(x=filtered_air['RAIN'])
+plt.title('BOXPLOT OF RAIN')
+
+ #boxplot of WSPM
+sns.boxplot(x=air['WSPM'])
+plt.title('BOXPLOT OF WSPM')
+
+ #filter the data 
+filtered_air=air[air['WSPM'] <= 3.3]
+sns.boxplot(x=filtered_air['WSPM'])
+plt.title('BOXPLOT OF WSPM')
+  
+pivot_air=air.pivot_table(index='month',columns='year',values='PM10')
+plt.figure(figsize=(5,5))
+sns.heatmap(pivot_air,annot=True, cmap='coolwarm',fmt=".2f")
+
+## This heatmap represents the PM2.5 concentration levels over different months (y-axis) and years (x-axis).
+## Some months (e.g., December, January, February) tend to have higher PM2.5 concentrations, possibly due to winter inversion effects and increased emissions.
+pivot_air=air.pivot_table(index='month',columns='year',values='PM25')
+plt.figure(figsize=(5,5))
+sns.heatmap(pivot_air,annot=True, cmap='coolwarm',fmt=".2f")
+  
+ ## This heatmap represents Sulfur Dioxide (SO₂) levels over different months (y-axis) and years (x-axis).
+## Higher SO₂ levels are observed in January, February, and December, especially in earlier years (2013-2014).
+## SO₂ concentrations are significantly lower in mid-year months (May-September), possibly due to improved atmospheric dispersion.
+## Overall declining trend in SO₂ pollution over the years is visible, indicating better pollution control measures.
+  
+pivot_air=air.pivot_table(index='month',columns='year',values='SO2')
+plt.figure(figsize=(5,5))
+sns.heatmap(pivot_air,annot=True, cmap='coolwarm',fmt=".2f")
+
+  sns.pointplot(x = 'year' , y ='PM25' , data = year_pm25)
+
+  year_pm25 = (
+    new_air[['PM25', 'year']]
+    .groupby("year", as_index=False)
+    .median()
+    .sort_values(by='year', ascending=False)
+)
+year_pm25
+
+  sns.pointplot(x = 'year' , y ='PM25' , data = year_pm25)
+  year_pm10 = (
+    new_air[['PM10', 'year']]
+    .groupby("year", as_index=False)
+    .median()
+    .sort_values(by='year', ascending=False)
+)
+year_pm10
+
+  sns.pointplot(x = 'year' , y ='PM10' , data = year_pm10)
+  year_so2 = (
+    new_air[['SO2', 'year']]
+    .groupby("year", as_index=False)
+    .median()
+    .sort_values(by='year', ascending=False)
+)
+
+year_so2
+
+  sns.pointplot(x = 'year' , y ='SO2' , data = year_so2)
+  year_no2 = (
+    new_air[['NO2', 'year']]
+    .groupby("year", as_index=False)
+    .median()
+    .sort_values(by='year', ascending=False)
+)
+year_no2
+
+  sns.pointplot(x = 'year' , y ='NO2' , data = year_no2)
+  year_co = (
+    new_air[['CO', 'year']]
+    .groupby("year", as_index=False)
+    .median()
+    .sort_values(by='year', ascending=False)
+)
+year_co
+
+  sns.pointplot(x = 'year' , y ='CO' , data = year_co)
+  year_o3 = (
+    new_air[['O3', 'year']]
+    .groupby("year", as_index=False)
+    .median()
+    .sort_values(by='year', ascending=False)
+)
+  year_o3
+
+  sns.pointplot(x = 'year' , y ='O3' , data = year_o3)
+  month_pm25 = (
+    new_air[['PM25', 'month']]
+    .groupby("month", as_index=False)
+    .median()
+    .sort_values(by='month', ascending=False)
+)
+month_pm25
+
+  sns.pointplot(x = 'month' , y ='PM25' , data = month_pm25)
+  month_pm10 = (
+    new_air[['PM10', 'month']]
+    .groupby("month", as_index=False)
+    .median()
+    .sort_values(by='month', ascending=False)
+)
+  month_pm10
+
+  sns.pointplot(x = 'month' , y ='PM10' , data = month_pm10)
+  month_so2 = (
+    new_air[['SO2', 'month']]
+    .groupby("month", as_index=False)
+    .median()
+    .sort_values(by='month', ascending=False)
+)
+  month_so2
+
+  sns.pointplot(x = 'month' , y ='SO2' , data = month_so2)
+  month_no2 = (
+    new_air[['NO2', 'month']]
+    .groupby("month", as_index=False)
+    .median()
+    .sort_values(by='month', ascending=False)
+)
+  month_no2
+
+  sns.pointplot(x = 'month' , y ='NO2' , data = month_no2)
+  month_co = (
+    new_air[['CO', 'month']]
+    .groupby("month", as_index=False)
+    .median()
+    .sort_values(by='month', ascending=False)
+)
+  month_co
+
+  sns.pointplot(x = 'month' , y ='CO' , data = month_co)
+  month_o3 = (
+    new_air[['O3', 'month']]
+    .groupby("month", as_index=False)
+    .median()
+    .sort_values(by='month', ascending=False)
+)
+  month_o3
+
+  sns.pointplot(x = 'month' , y ='O3' , data = month_o3)
+  
+  corr = new_air.select_dtypes(include=['number']).corr()
+  mask=np.zeros_like(corr,dtype=np.bool)
+  mask[np.triu_indices_from(mask)] = True
+  plt.figure(figsize=(10,6))
+sns.heatmap(corr, annot=True, fmt=".2f",mask=mask)
+
+  # Define colors using Seaborn's xkcd color dictionary
+#colors = [sns.xkcd_rgb["windows blue"], "amber", "faded green", "dusty purple"]
+
+# Corrected Seaborn settings
+sns.set(rc={"figure.figsize": (18, 8),
+            "axes.labelsize": 14,
+            "xtick.labelsize": 14,
+            "ytick.labelsize": 14})
+sns.boxplot(x ='station', y ='PM25',
+            data=air.dropna(axis=0).reset_index())
+sns.boxplot(x ='station', y ='PM10',
+            data=air.dropna(axis=0).reset_index())
+  
