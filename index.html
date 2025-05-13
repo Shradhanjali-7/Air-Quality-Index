@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Air Quality Index</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #3a7bd5, #00d2ff);
+      color: white;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: start;
+      padding-top: 60px;
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 15px 0;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .datetime-box {
+      position: absolute;
+      top: 45px;
+      right: 50px;
+      padding-left: 20px;
+      padding-right: 20px;
+      padding-top: 15px;
+      padding-bottom: 15px;
+      text-align: right;
+      font-size: 17px;
+      font-family: Arial;
+      color: rgb(40, 37, 37);
+      font-weight: bold;
+      background-color:rgb(255, 252, 252);
+      border-radius: 10px;
+
+      
+    }
+
+    .container {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      max-width: 400px;
+      width: 90%;
+      margin-top: 100px;
+      text-align: center;
+    }
+
+    .container h2 {
+      margin-bottom: 25px;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 12px 15px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-size: 1rem;
+    }
+
+    button {
+      background-color: #fff;
+      color: #007acc;
+      font-weight: bold;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #007acc;
+      color: white;
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 25px;
+      }
+
+      .navbar {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Live Date/Time Box -->
+  <div class="datetime-box">
+    <div class="date" id="current-date">Loading date...</div>
+    <div class="time" id="current-time">Loading time...</div>
+  </div>
+
+  <div class="navbar">
+    <h1>Air Quality Index</h1>
+  </div>
+
+  <div class="container">
+    <h2>Check Air Quality</h2>
+    <form method="POST" id="aqi-form" action="/result.html">
+      <input type="number" name="PM25" placeholder="PM2.5 (µg/m³)" required>
+      <input type="number" name="PM10" placeholder="PM10 (µg/m³)" required>
+      <input type="number" name="NO2" placeholder="NO₂ (µg/m³)" required>
+      <input type="number" name="SO2" placeholder="SO₂ (µg/m³)" required>
+      <input type="number" name="CO" placeholder="CO (mg/m³)" required>
+      <input type="number" name="O3" placeholder="O₃ (µg/m³)" required>
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+
+  <script>
+    function updateDateTime() {
+      const now = new Date();
+      const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const months = ["January", "February", "March", "April", "May", "June", "July",
+                      "August", "September", "October", "November", "December"];
+      const day = days[now.getDay()];
+      const month = months[now.getMonth()];
+      const date = now.getDate();
+      const year = now.getFullYear();
+      let hours = now.getHours();
+      let minutes = now.getMinutes();
+      let seconds = now.getSeconds();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12 || 12;
+      minutes = minutes < 10 ? '0' + minutes : minutes;
+      seconds = seconds < 10 ? '0' + seconds : seconds;
+      document.getElementById('current-date').textContent = `${day}, ${month} ${date}, ${year}`;
+      document.getElementById('current-time').textContent = `${hours}:${minutes}:${seconds} ${ampm}`;
+    }
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+
+    document.getElementById("aqi-form").addEventListener("submit", async function(event) {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const params = new URLSearchParams(formData);
+      
+      try {
+        const response = await fetch(`/predict?${params.toString()}`);
+        const data = await response.json();
+        if (data.aqi !== undefined) {
+          window.location.href = `/result?aqi=${data.aqi}`;
+        } else {
+          alert("Error calculating AQI.");
+        }
+      } catch (err) {
+        alert("Failed to connect to server.");
+      }
+    });
+  </script>
+</body>
+</html>
